@@ -7,7 +7,7 @@ int x=0;
 %}
 
 %%
-[A][A-Za-z][A-Za-z]	     {
+^[A][A-Za-z][A-Za-z]$	     {
 				for(int i=0;i<yyleng;i++){
 					yytext[i]=toupper(yytext[i]);
 				}
