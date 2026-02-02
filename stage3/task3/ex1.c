@@ -204,6 +204,12 @@ void printn(tnode* root){
         break;
     case Neq:printf("EQ\n");
         break;
+    case Nif: printf("IF\n");
+        break;
+    case Nif_else: printf("IFELSE\n");
+        break;
+    case Nwhile: printf("WHILE\n");
+        break;
     default:
         break;
     }

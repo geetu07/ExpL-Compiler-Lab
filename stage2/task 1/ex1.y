@@ -24,7 +24,7 @@
 
 program : BEGINK stmtlist ENDK SEMICOLON	{
 				print($2);
-				printf("Done!");
+				printf("Done!\n");
 				exit(0);
 			}
 			| BEGINK ENDK SEMICOLON	{printf("Done!");$$=NULL;}

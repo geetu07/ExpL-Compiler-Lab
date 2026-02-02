@@ -30,7 +30,6 @@ void releaseRegister(int regNo){
 }
 
 
-//assembly code generation part
 
 void generateHeader(){
 	fprintf(target,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);

@@ -48,6 +48,10 @@ struct tnode* createVar(char *name,int type){
 
 tnode *makeOperatorNode(char s,tnode *l,tnode*r){
     struct tnode* temp=(tnode*)malloc(sizeof(tnode));
+    if(l->type!=INT || r->type!=INT){
+        printf("operand type not INT!\n");
+        exit(1);
+    }
     temp->left=l;
     temp->right=r;
     temp->val=INT_MAX;
@@ -87,6 +91,10 @@ tnode * createWrite(tnode *t){
 }
 
 tnode * createAssign(tnode *l,tnode *r){
+    if(l->type!=INT || r->type!=INT){
+        printf("Assign type error\n");
+        exit(1);
+    }
     struct tnode* temp=(tnode*)malloc(sizeof(tnode));
     temp->left=l;
     temp->right=r;
@@ -243,6 +251,12 @@ void printn(tnode* root){
     case Nwrite:printf("WRITE\n");
         break;
     case Nvar:printf("%s\n",root->varname);
+        break;
+    case Nif: printf("IF\n");
+        break;
+    case Nif_else: printf("IFELSE\n");
+        break;
+    case Nwhile: printf("WHILE\n");
         break;
     case Nge:printf("GE\n");
         break;

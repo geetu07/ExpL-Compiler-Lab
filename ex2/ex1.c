@@ -1,0 +1,467 @@
+#include <stdlib.h>
+#include<stdio.h>
+#include <string.h>
+#include "ex1.h"
+#include<limits.h>
+#include "symbol.h"
+
+//stage 2
+struct tnode* createTree(int val, int type, char* c, struct tnode *l, struct tnode *r){
+    if(val!=INT_MAX){
+        return createConst(val);
+    }
+    else if(c)
+        return createNewVariable(c);
+    else{
+        struct tnode *temp=(tnode*)malloc(sizeof(tnode));
+        temp->val=INT_MAX;
+        temp->nodetype=type;
+        temp->varname=NULL;
+        temp->left=l;
+        temp->right=r;
+        return temp;
+    }
+}
+
+struct tnode* createConst(int val){
+    struct tnode* temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=NULL;
+    temp->right=NULL;
+    temp->val=val;
+    temp->nodetype=Nconst;
+    temp->varname=NULL;
+    temp->type=INT;
+    return temp;
+}
+
+
+tnode *makeOperatorNode(char s,tnode *l,tnode*r){
+    struct tnode* temp=(tnode*)malloc(sizeof(tnode));
+    if(l->type!=INT || r->type!=INT){
+        printf("operand type not INT!\n");
+        exit(1);
+    }
+    temp->left=l;
+    temp->right=r;
+    temp->val=INT_MAX;
+    if(s=='+')
+    temp->nodetype=Nadd;
+    else if(s=='-')
+    temp->nodetype=Nsub;
+    else if(s=='*')
+    temp->nodetype=Nmul;
+    else if(s=='/')
+    temp->nodetype=Ndiv;
+    else temp->nodetype=Nmod;
+    temp->varname=NULL;
+    temp->type=INT;
+    return temp;
+}
+
+tnode * createRead(tnode *t){
+    tnode *id=createVariableUsageNode(t->varname);
+
+    struct tnode* temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=id;
+    temp->right=NULL;
+    temp->val=INT_MAX;
+    temp->nodetype=Nread;
+    temp->varname=NULL;
+    temp->type=-1;
+    return temp;
+}
+
+tnode * createWrite(tnode *t){
+    if(t->type!=INT && t->type!=STRING){
+        printf("WRITE ERROR\n");
+        exit(1);
+    }
+    struct tnode* temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=t;
+    temp->right=NULL;
+    temp->val=INT_MAX;
+    temp->nodetype=Nwrite;
+    temp->varname=NULL;
+    temp->type=-1;
+    return temp;
+}
+
+tnode * createAssign(tnode *l,tnode *r){
+    tnode* x=createVariableUsageNode(l->varname);
+    if(x->type!=r->type){
+        printf("Assign type error\n");
+        exit(1);
+    }
+    struct tnode* temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=x;
+    temp->right=r;
+    temp->val=INT_MAX;
+    temp->nodetype=Nassign;
+    temp->varname=NULL;
+    temp->type=-1;
+    return temp;
+}
+
+tnode * createConnect(tnode *l,tnode*r){
+    struct tnode* temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=l;
+    temp->right=r;
+    temp->val=INT_MAX;
+    temp->nodetype=Nconnect;
+    temp->varname=NULL;
+    temp->type=-1;
+    return temp;
+}
+
+tnode* createCondition(int type,tnode*left, tnode*right){
+    if(left->type!=INT || right->type!=INT){
+        printf("ERROR! of condition");
+        exit(1);
+    }
+    struct tnode *temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=left;
+    temp->right=right;
+    temp->val=INT_MAX;
+    temp->nodetype=type;
+    temp->varname=NULL;
+    temp->type=BOOL;
+    return temp;
+}
+
+tnode* createWhile(tnode* cond,tnode*left){
+    if(cond->type!=BOOL){
+        printf("ERROR! of while");
+        exit(1);
+    }
+    struct tnode *temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=cond;
+    temp->right=left;
+    temp->val=INT_MAX;
+    temp->nodetype=Nwhile;
+    temp->varname=NULL;
+    temp->type=NONE;
+    return temp;
+}
+
+tnode* createIfElseNode(tnode* cond,tnode*left,tnode*right){
+    if(cond->type!=BOOL){
+        printf("ERROR! of ifelse");
+        exit(1);
+    }
+    struct tnode *temp=(tnode*)malloc(sizeof(tnode));
+    struct tnode *conn=createConnect(left,right);
+    temp->left=cond;
+    temp->right=conn;
+    temp->val=INT_MAX;
+    temp->nodetype=Nif_else;
+    temp->varname=NULL;
+    temp->type=NONE;
+    return temp;
+}
+
+tnode* createIfNode(tnode* cond,tnode*left){
+    if(cond->type!=BOOL){
+        printf("ERROR! of if");
+        exit(1);
+    }
+    struct tnode *temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=cond;
+    temp->right=left;
+    temp->val=INT_MAX;
+    temp->nodetype=Nif;
+    temp->varname=NULL;
+    temp->type=NONE;
+    return temp;
+}
+
+tnode* createBreak(){
+    tnode*temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=NULL;
+    temp->right=NULL;
+    temp->val=INT_MAX;
+    temp->nodetype=Nbreak;
+    temp->varname=NULL;
+    temp->type=NONE;
+    return temp;
+}
+
+tnode*createContinue(){
+    tnode*temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=NULL;
+    temp->right=NULL;
+    temp->val=INT_MAX;
+    temp->nodetype=Ncontinue;
+    temp->varname=NULL;
+    temp->type=NONE;
+    return temp;
+}
+
+tnode *createDoWhile(tnode* stmt, tnode*cond){
+    if(cond->type!=BOOL){
+        printf("condition for do ehilr is not BOOL!");
+        exit(1);
+    }
+    tnode*temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=cond;
+    temp->right=stmt;
+    temp->val=INT_MAX;
+    temp->nodetype=NdoWhile;
+    temp->varname=NULL;
+    temp->type=NONE;
+    return temp;
+
+}
+tnode* createRepeat(tnode*stmt,tnode*cond){
+    if(cond->type!=BOOL){
+        printf("condition for repeat until is not BOOL!");
+        exit(1);
+    }
+    tnode*temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=stmt;
+    temp->right=cond;
+    temp->val=INT_MAX;
+    temp->nodetype=Nrepeat;
+    temp->varname=NULL;
+    temp->type=NONE;
+    return temp;
+}
+
+tnode* createDeclaration(tnode* type,tnode* var){
+    tnode*temp=createConnect(type,var);
+    temp->val=INT_MAX;
+    temp->nodetype=Ndecl;
+    temp->varname=NULL;
+    temp->type=NONE;
+    return temp;
+}
+
+tnode* createType(int type){
+    tnode*temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=NULL;
+    temp->right=NULL;
+    temp->val=INT_MAX;
+    temp->nodetype=Ntype;
+    temp->varname=NULL;
+    temp->type=type;
+    return temp;
+}
+
+
+void printn(tnode* root){
+    switch (root->nodetype)
+    {
+    case Nadd:printf("+\n");
+        break;
+    case Nsub:printf("-\n");
+        break;
+    case Nmul:printf("*\n");
+        break;
+    case Ndiv:printf("/\n");
+        break;
+    case Nmod:printf("MOD \n");
+        break;
+    case Nassign:printf("Assign\n");
+        break;
+    case Nconnect:printf("Connect\n");
+        break;
+    case Nconst:printf("%d\n",root->val);
+        break;
+    case Nread:printf("READ\n");
+        break;
+    case NreadArr:printf("READ TO ARRAY\n");
+        break;
+    case Nwrite:printf("WRITE\n");
+        break;
+    case Nvar:printf("%s\n",root->varname);
+        break;
+    case Nif: printf("IF\n");
+        break;
+    case Nif_else: printf("IFELSE\n");
+        break;
+    case Nwhile: printf("WHILE\n");
+        break;
+    case Nrepeat:printf("REPEAT\n");
+        break;
+    case NdoWhile:printf("DO WHILE\n");
+        break;
+    case Nge:printf("GE\n");
+        break;
+    case Ngt:printf("GT\n");
+        break;
+    case Nle:printf("LE\n");
+        break;
+    case Nlt:printf("LT\n");
+        break;
+    case Nne:printf("NE\n");
+        break;
+    case Neq:printf("EQ\n");
+        break;
+    case Ndecl:printf("DECL\n");
+        break;
+    case Ntype:printf("TYPE\n");
+        break;
+    case NaddrTo:printf("&\n");
+        break;
+    case NassToDefer:printf("ASSIGN TO DEREFER\n");
+        break;
+    case Nderefer:printf("*\n");
+        break;
+    default:
+        break;
+    }
+}
+
+void print(tnode* root){
+    int x=0;
+    if(root==NULL)return;
+    printn(root);
+    print(root->left);
+    print(root->right);
+}
+
+
+tnode *createString(char *s){
+    struct tnode *temp=(tnode*)malloc(sizeof(tnode));
+    temp->left = NULL;
+    temp->right = NULL;
+    temp->nodetype = Nstr;
+    temp->varname = NULL;
+    temp->type=-1;
+    temp->val=0;
+    temp->strval = (char *)malloc(strlen(s)+1);
+    strcpy(temp->strval,s);
+    temp->type = STRING;
+    return temp;
+}
+
+tnode *createNewVariable(char *varName){
+    tnode*temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=NULL;
+    temp->right=NULL;
+    temp->type=-1;
+    temp->nodetype = Nvar;
+    temp->val = INT_MAX;
+    temp->varname=(char *)malloc(strlen(varName)+1);
+    strcpy(temp->varname,varName);
+    return temp;
+}
+
+tnode *createVariableUsageNode(char *varname){
+    tnode*temp=(tnode*)malloc(sizeof(tnode)); 
+    temp->left=NULL;
+    temp->right=NULL;
+    temp->type=-1;
+    temp->nodetype = Nvar;
+    temp->val = INT_MAX;
+    temp->varname=(char *)malloc(strlen(varname)+1);
+    strcpy(temp->varname,varname);
+    Gsymbol *entry=Lookup(varname);
+    if (!entry) {
+        printf("DECLARE BEFORE USING VAR %s\n",varname);
+        exit(1);
+    } else {
+        temp->type = entry->type;
+        temp->Gentry=entry;
+    }
+    return temp;
+}
+
+tnode* createArray(tnode* varList,tnode*id,tnode*size){
+    tnode*temp=(tnode*)malloc(sizeof(tnode));
+    temp->left=id;
+    temp->right=size;
+    temp->type=-1;
+    temp->nodetype = NArr;
+    temp->val = INT_MAX;
+    temp->varname=NULL;
+    tnode* x=createConnect(varList,temp);
+    return x;
+}
+
+tnode* createArrAssign(tnode*id,tnode*index,tnode*val ){
+    tnode *arr=createConnect(createVariableUsageNode(id->varname),index);
+    tnode *assi=createConnect(arr,val);
+    assi->nodetype=NArrAssign;
+    assi->type=NONE;
+    assi->val=INT_MAX;
+    assi->varname=NULL;
+    return assi;
+}
+
+tnode *createArrayAccess(tnode *idNode, tnode *indexExprNode) {
+     tnode *id = createVariableUsageNode(idNode->varname);
+     tnode *arr = createConnect(id, indexExprNode);
+    arr->nodetype=NArrAccess;
+    arr->val=INT_MAX;
+    arr->type=id->type;
+    arr->varname=NULL;
+    return arr;
+}
+
+tnode* createReadArr(tnode*id, tnode*expr){
+    tnode* x=createArrayAccess(id,expr);
+    tnode*temp=(tnode*)malloc(sizeof(tnode)); 
+    temp->left=x;
+    temp->right=NULL;
+    temp->type=-1;
+    temp->nodetype = NreadArr;
+    temp->val = INT_MAX;
+    temp->varname=NULL;
+    return temp;
+}
+
+tnode *createDerefer(tnode*id){
+    tnode *x=createVariableUsageNode(id->varname);
+    tnode*temp=(tnode*)malloc(sizeof(tnode)); 
+    temp->left=x;
+    temp->right=NULL;
+    temp->type=x->Gentry->type;
+    temp->nodetype = Nderefer;
+    temp->val = INT_MAX;
+    temp->varname=NULL;
+    if(!x->Gentry->ptr){
+        printf("Error!");
+        exit(1);
+    }
+    return temp;
+}
+tnode *createAddr(tnode*id){
+    tnode *x=createVariableUsageNode(id->varname);
+    tnode*temp=(tnode*)malloc(sizeof(tnode)); 
+    temp->left=x;
+    temp->right=NULL;
+    temp->type=x->Gentry->type;
+    temp->nodetype = NaddrTo;
+    temp->val = INT_MAX;
+    temp->varname=NULL;
+    if(x->Gentry->ptr){
+        printf("Error!");
+        exit(1);
+    }
+    return temp;
+}
+tnode *createAssignToDeref(tnode*id, tnode*r){
+    tnode *x=createVariableUsageNode(id->varname);
+    tnode*temp=(tnode*)malloc(sizeof(tnode)); 
+    temp->left=x;
+    temp->right=r;
+    temp->type=NONE;
+    temp->nodetype = NassToDefer;
+    temp->val = INT_MAX;
+    temp->varname=NULL;
+    if(!x->Gentry->ptr){
+        printf("Error!");
+        exit(1);
+    }
+    return temp;
+}
+tnode*createPointer(tnode* id){
+    tnode*temp=(tnode*)malloc(sizeof(tnode)); 
+    temp->left=id;
+    temp->right=NULL;
+    temp->type=NONE;
+    temp->nodetype = Nderefer;
+    temp->val = INT_MAX;
+    temp->varname=NULL;
+    return temp;
+}

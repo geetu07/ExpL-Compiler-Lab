@@ -186,6 +186,12 @@ void printn(tnode* root){
         break;
     case Nconst:printf("%d\n",root->val);
         break;
+    case Nif: printf("IF\n");
+        break;
+    case Nif_else: printf("IFELSE\n");
+        break;
+    case Nwhile: printf("WHILE\n");
+        break;
     case Nread:printf("READ\n");
         break;
     case Nwrite:printf("WRITE\n");

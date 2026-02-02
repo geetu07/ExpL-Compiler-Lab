@@ -15,7 +15,7 @@ void initializeRegisters(){
 }
 
 int getFreeRegister(){
-    for(int i=0;i<19;i++) {
+    for(int i=0;i<=19;i++) {
         if(registers[i]){
             registers[i]=false;
             return i;
@@ -197,8 +197,7 @@ int generateCode(tnode* root){
                 return -1;
         }
         case NdoWhile:{
-                generateCode(root->right);
-                generateWhileCode(root);
+                generateDoWhileCode(root);
                 return -1;
         }
     }
@@ -303,6 +302,18 @@ void generateRepeatCode(tnode *node){
     generateCode(node->left);
     int x=generateCondCode(node->right);
     fprintf(target,"JZ R%d, L%d\n",x,loop);
+    releaseRegister(x);
+    fprintf(target,"L%d:\n",rest);
+    popStack();
+}
+
+void generateDoWhileCode(tnode*root){
+    int loop=createNewL(),rest=createNewL();
+    pushStack(loop,rest);
+    fprintf(target,"L%d:\n",loop);
+    generateCode(root->right);
+    int x=generateCondCode(root->left);
+    fprintf(target,"JNZ R%d, L%d\n",x,loop);
     releaseRegister(x);
     fprintf(target,"L%d:\n",rest);
     popStack();

@@ -14,7 +14,7 @@ void initializeRegisters(){
 }
 
 int getFreeRegister(){
-    for(int i=0;i<19;i++) {
+    for(int i=0;i<=19;i++) {
         if(registers[i]){
             registers[i]=false;
             return i;

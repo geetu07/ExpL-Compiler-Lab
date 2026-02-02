@@ -190,6 +190,12 @@ void printn(tnode* root){
         break;
     case Nwrite:printf("WRITE\n");
         break;
+    case Nif: printf("IF\n");
+        break;
+    case Nif_else: printf("IFELSE\n");
+        break;
+    case Nwhile: printf("WHILE\n");
+        break;
     case Nvar:printf("%s\n",root->varname);
         break;
     case Nge:printf("GE\n");

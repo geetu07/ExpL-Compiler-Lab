@@ -88,6 +88,10 @@ tnode * createWrite(tnode *t){
 
 tnode * createAssign(tnode *l,tnode *r){
     struct tnode* temp=(tnode*)malloc(sizeof(tnode));
+    if(l->type!=INT || r->type!=INT){
+        printf("Error");
+        exit(1);
+    }
     temp->left=l;
     temp->right=r;
     temp->val=INT_MAX;
@@ -225,6 +229,12 @@ void printn(tnode* root){
     case Nne:printf("NE\n");
         break;
     case Neq:printf("EQ\n");
+        break;
+    case Nif: printf("IF\n");
+        break;
+    case Nif_else: printf("IFELSE\n");
+        break;
+    case Nwhile: printf("WHILE\n");
         break;
     default:
         break;
