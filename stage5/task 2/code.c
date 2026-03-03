@@ -1,0 +1,472 @@
+#include<stdio.h>
+#include<stdbool.h>
+#include<stdlib.h>
+#include "code.h"
+#include"label.h"
+#include "ex1.h"
+#include "symbol.h"
+
+FILE *target;
+bool registers[20];
+
+void initializeRegisters(){
+    for(int i=0;i<=19;i++){
+        registers[i]=true;
+    }
+}
+
+int getFreeRegister(){
+    for(int i=0;i<=19;i++) {
+        if(registers[i]){
+            registers[i]=false;
+            return i;
+        }
+    }
+    printf("No Free Registers\n");
+    exit(1);
+}
+
+void releaseRegister(int regNo){
+    if(regNo>=0 && regNo<20)
+    registers[regNo]=true;
+    else{
+        printf("Invalid register freed");
+        exit(1);
+    }
+}
+
+
+//assembly code generation part
+
+void generateHeader(){
+	fprintf(target,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
+	fprintf(target,"MOV SP, %d\n",stop);
+    fprintf(target,"BRKP\n");
+}
+
+void generateExit(){
+	int x=getFreeRegister();
+	fprintf(target,"MOV R%d, \"%s\"\n",x,"Exit");
+	fprintf(target,"PUSH R%d\n",x);
+	fprintf(target,"PUSH R%d\n",x);
+	fprintf(target,"PUSH R%d\n",x);
+	fprintf(target,"PUSH R%d\n",x);
+	fprintf(target,"PUSH R%d\n",x);
+	fprintf(target,"CALL 0\n");
+	releaseRegister(x);
+}
+
+int genAdd(int l,int r){
+    fprintf(target,"ADD R%d, R%d\n",l,r);
+    releaseRegister(r);
+    return l;
+}
+int genSub(int l,int r){
+    fprintf(target,"SUB R%d, R%d\n",l,r);
+    releaseRegister(r);
+    return l;
+}
+int genMul(int l,int r){
+    fprintf(target,"MUL R%d, R%d\n",l,r);
+    releaseRegister(r);
+    return l;
+}
+int genDiv(int l,int r){
+    fprintf(target,"DIV R%d, R%d\n",l,r);
+    releaseRegister(r);
+    return l;
+}
+int genMod(int l,int r){
+    fprintf(target,"MOD R%d, R%d\n",l,r);
+    releaseRegister(r);
+    return l;
+}
+
+void genWriteToMem(int reg,int mem){
+    fprintf(target,"MOV [%d], R%d\n",mem,reg);
+}
+
+void genRead(int mem){
+    int a=getFreeRegister();
+    int b=getFreeRegister();
+    int c=getFreeRegister();
+    int d=getFreeRegister();
+    int e=getFreeRegister();
+    fprintf(target,"MOV R%d, \"%s\"\n",a,"Read");
+    fprintf(target,"PUSH R%d\n",a);
+    fprintf(target,"MOV R%d, -1\n",b);
+    fprintf(target,"PUSH R%d\n",b);
+    fprintf(target,"MOV R%d, %d\n",c,mem);
+    fprintf(target,"PUSH R%d\n",c);
+    fprintf(target,"PUSH R%d\n",d);
+    fprintf(target,"PUSH R%d\n",e);
+    fprintf(target,"CALL 0\n");
+    fprintf(target,"SUB SP, 5\n");
+    releaseRegister(a);
+    releaseRegister(b);
+    releaseRegister(c);
+    releaseRegister(d);
+    releaseRegister(e);
+}
+
+void genReadAddinReg(int x){
+    int a=getFreeRegister();
+    int b=getFreeRegister();
+    int c=getFreeRegister();
+    int d=getFreeRegister();
+    fprintf(target,"MOV R%d, \"%s\"\n",a,"Read");
+    fprintf(target,"PUSH R%d\n",a);
+    fprintf(target,"MOV R%d, -1\n",b);
+    fprintf(target,"PUSH R%d\n",b);
+    fprintf(target,"PUSH R%d\n",x);
+    fprintf(target,"PUSH R%d\n",c);
+    fprintf(target,"PUSH R%d\n",d);
+    fprintf(target,"CALL 0\n");
+    fprintf(target,"SUB SP, 5\n");
+    releaseRegister(a);
+    releaseRegister(d);
+    releaseRegister(c);
+    releaseRegister(b);
+}
+
+
+void genWrite(int reg){
+    int a=getFreeRegister();
+    int b=getFreeRegister();
+    int c=getFreeRegister();
+    int d=getFreeRegister();
+    fprintf(target,"MOV R%d, \"%s\"\n",a,"Write");
+    fprintf(target,"PUSH R%d\n",a);
+    fprintf(target,"MOV R%d, -2\n",b);
+    fprintf(target,"PUSH R%d\n",b);
+    fprintf(target,"PUSH R%d\n",reg);
+    fprintf(target,"PUSH R%d\n",c);
+    fprintf(target,"PUSH R%d\n",d);
+    fprintf(target,"CALL 0\n");
+    fprintf(target,"SUB SP, 5\n");
+    releaseRegister(a);
+    releaseRegister(d);
+    releaseRegister(c);
+    releaseRegister(b);
+}
+
+int genConst(int val){
+    int reg=getFreeRegister();
+    fprintf(target,"MOV R%d,%d\n",reg,val);
+    return reg;
+}
+int genLoadStrLit(char*str){
+    int x=getFreeRegister();
+    fprintf(target,"MOV R%d, %s\n",x,str);
+    return x;
+}
+
+int genAddr(tnode *root){
+    Gsymbol *x=root->Gentry;
+    if(!x){
+        printf("Didnt get ST Entry for %s",root->varname);
+        exit(1);
+    }
+    return x->binding;
+}
+
+int genAssign(tnode*root){
+    int x=genAddr(root->left);
+    int y=generateCode(root->right);
+    fprintf(target,"MOV [%d], R%d\n",x,y);
+    releaseRegister(y);
+    return -1;
+}
+
+int genLoadvar(tnode*root){
+    int x=genAddr(root);
+    int y=getFreeRegister();
+    fprintf(target,"MOV R%d, [%d]\n",y,x);
+    return y;
+}
+
+int generateCode(tnode* root){
+    if(root==NULL)return -1;
+    switch(root->nodetype){
+        case Nassign: return genAssign(root);
+
+        case Nconnect:{ generateCode(root->left);
+                        generateCode(root->right);
+                        return -1;}
+        case Nvar: return genLoadvar(root);
+        case Nconst: return genConst(root->val);
+        case Nstr: return genLoadStrLit(root->strval);
+        case Nread: {int x=genAddr(root->left);
+                        genRead(x);
+                        return -1;}
+        case NreadArr:{
+                    int x=genArrAddr(root->left);
+                    genReadAddinReg(x);
+                    return -1;
+        }
+        case Nwrite: {int x=generateCode(root->left);
+                    genWrite(x);
+                    return -1;}
+        case Nadd: {int l=generateCode(root->left);
+                    int r=generateCode(root->right);
+                    return genAdd(l,r);}
+        case Nsub: {int l=generateCode(root->left);
+                    int r=generateCode(root->right);
+                    return genSub(l,r);}
+        case Nmul: {int l=generateCode(root->left);
+                    int r=generateCode(root->right);
+                    return genMul(l,r);}
+        case Ndiv: {int l=generateCode(root->left);
+                    int r=generateCode(root->right);
+                    return genDiv(l,r);}
+        case Nmod: {int l=generateCode(root->left);
+                    int r=generateCode(root->right);
+                    return genMod(l,r);}
+        case Nwhile:{
+                    generateWhileCode(root);
+                    return -1;
+        }
+        case Nif_else:{
+                    generateIfElseCode(root);
+                    return -1;
+        }
+        case Nif:{
+                    generateIfCode(root);
+                    return -1;
+        }
+        case Nbreak:{
+                    generateBreakCode();
+                    return -1;
+        }
+        case Ncontinue:{
+                    generateContinueCode();
+                    return -1;
+        }
+        case Nrepeat:{
+                generateRepeatCode(root);
+                return -1;
+        }
+        case NdoWhile:{
+                generateDoWhileCode(root);
+                return -1;
+        }
+        case NArrAccess:{
+            return genArrAccess(root);
+        }
+        case NArrAssign:{
+            genAssToArr(root);
+            return -1;
+        }
+        case Nderefer:{
+            return genDerefer(root);
+        }
+        case NaddrTo:{
+            return genAddrToCode(root);
+        }
+        case NassToDefer:{
+            genAssignDerefer(root);
+            return -1;
+        }
+    }
+}
+
+void generate(tnode*root){
+    target=fopen("ans.xsm","w");
+    initializeRegisters();
+    generateHeader();
+    generateCode(root);
+    generateExit();
+}
+
+//stage3
+int generateCondCode(tnode* node){
+    int l=generateCode(node->left);
+    int r=generateCode(node->right);
+    switch(node->nodetype){
+        case Nge:{
+            fprintf(target,"GE R%d, R%d\n",l,r);
+            break;
+        }
+        case Nle:{
+            fprintf(target,"LE R%d, R%d\n",l,r);
+            break;
+        }
+        case Ngt:{
+            fprintf(target,"GT R%d, R%d\n",l,r);
+            break;
+        }
+        case Nlt:{
+            fprintf(target,"LT R%d, R%d\n",l,r);
+            break;
+        }
+        case Nne:{
+            fprintf(target,"NE R%d, R%d\n",l,r);
+            break;
+        }
+        case Neq:{
+            fprintf(target,"EQ R%d, R%d\n",l,r);
+            break;
+        }
+    }
+    //fprintf(target,"JZ R%d, L%d\n",l,label);
+    if(r!=-1)
+    releaseRegister(r);
+    return l;
+}
+
+void generateWhileCode(tnode*node){
+    int cond=createNewL(),rest=createNewL();
+
+    pushStack(cond,rest);
+
+    fprintf(target,"L%d:\n",cond);
+    int x=generateCondCode(node->left);
+    fprintf(target,"JZ R%d, L%d\n",x,rest);
+    releaseRegister(x);
+    generateCode(node->right);
+    fprintf(target,"JMP L%d\n",cond);
+    fprintf(target,"L%d:\n",rest);
+    popStack();
+}
+
+void generateIfElseCode(tnode*node){
+    int elsek=createNewL(),rest=createNewL();
+    tnode*cond=node->left,*conn=node->right,*ifn=conn->left,*elsen=conn->right;
+    int x=generateCondCode(cond);
+    fprintf(target,"JZ R%d, L%d\n",x,elsek);
+    releaseRegister(x);
+    generateCode(ifn);
+    fprintf(target,"JMP L%d\n",rest);
+    fprintf(target,"L%d:\n",elsek);
+    generateCode(elsen);
+    fprintf(target,"L%d:\n",rest);
+}
+void generateIfCode(tnode*node){
+    int rest=createNewL();
+    tnode*cond=node->left;
+    tnode *ifn=node->right;
+    int x=generateCondCode(cond);
+    fprintf(target,"JZ R%d, L%d\n",x,rest);
+    releaseRegister(x);
+    generateCode(node->right);
+    fprintf(target,"L%d:\n",rest);
+}
+
+void generateBreakCode(){
+    LStack *temp=peekStack();
+    int rest=temp->rest;
+    fprintf(target,"JMP L%d\n",rest);
+}
+void generateContinueCode(){
+    LStack *temp=peekStack();
+    int loop=temp->condLabel;
+    fprintf(target,"JMP L%d\n",loop);
+}
+
+void generateRepeatCode(tnode *node){
+    int loop=createNewL(),rest=createNewL();
+    pushStack(loop,rest);
+    fprintf(target,"L%d:\n",loop);
+    generateCode(node->left);
+    int x=generateCondCode(node->right);
+    fprintf(target,"JZ R%d, L%d\n",x,loop);
+    releaseRegister(x);
+    fprintf(target,"L%d:\n",rest);
+    popStack();
+}
+
+void generateDoWhileCode(tnode*root){
+    int loop=createNewL(),rest=createNewL();
+    pushStack(loop,rest);
+    fprintf(target,"L%d:\n",loop);
+    generateCode(root->right);
+    int x=generateCondCode(root->left);
+    fprintf(target,"JNZ R%d, L%d\n",x,loop);
+    releaseRegister(x);
+    fprintf(target,"L%d:\n",rest);
+    popStack();
+}
+
+int genArrAddr(tnode* x){
+    tnode*id=x->left;
+    tnode*index=x->right;
+    if(id==NULL || id->Gentry==NULL){
+        printf("INVALID\n");
+        exit(1);
+    }
+    Gsymbol* entry=id->Gentry;
+    int size=0;
+    if(entry->type==INT)size=4;
+    else if(entry->type==STRING)size=6;
+    else size=0;
+
+    int baseAddr=entry->binding;
+    int addrReg;
+    if(entry->numdimen==1){
+        int indreg=generateCode(index);
+        int t=getFreeRegister();
+        fprintf(target, "MOV R%d, %d\n", t, size);
+        fprintf(target,"MUL R%d, R%d\n",indreg,t);
+        releaseRegister(t);
+        fprintf(target,"ADD R%d, %d\n",indreg,baseAddr);
+        addrReg=indreg;
+    }
+    else if(entry->numdimen==2){
+        tnode* row=index->left;
+        tnode *col=index->right;
+        int cols=entry->dimension[1];
+        int rowReg=generateCode(row);
+        fprintf(target, "MUL R%d, %d\n",rowReg,cols);
+        int colReg=generateCode(col);
+        fprintf(target,"ADD R%d, R%d\n",rowReg,colReg);
+        releaseRegister(colReg);
+        fprintf(target,"MUL R%d, %d\n",rowReg,size);
+        fprintf(target,"ADD R%d, %d\n",rowReg,baseAddr);
+        addrReg=rowReg;
+    }
+    return addrReg;
+}
+
+int genArrAccess(tnode*root){
+    int index=genArrAddr(root);
+    int x=getFreeRegister();
+    fprintf(target,"MOV R%d, [R%d]\n",x,index);
+    releaseRegister(index);
+    return x;
+}
+
+void genAssToArr(tnode*root){
+    int index=genArrAddr(root->left);
+    int val=generateCode(root->right);
+    fprintf(target,"MOV [R%d], R%d\n",index,val);
+    releaseRegister(index);
+    releaseRegister(val);
+}
+
+int genAddrToCode(tnode* root){
+    int mem=genAddr(root->left);
+    int x=getFreeRegister();
+    fprintf(target,"MOV R%d, %d\n",x,mem);
+    return x;
+}
+
+int genDerefer(tnode*x){
+    int free=getFreeRegister();
+    int id=generateCode(x->left);
+    fprintf(target,"MOV R%d, [R%d]\n",free,id);
+    releaseRegister(id);
+    return free;
+}
+
+void genAssignDerefer(tnode*root){
+    int x=generateCode(root->left);
+    int y=generateCode(root->right);
+    fprintf(target,"MOV [R%d],R%d\n",x,y);
+}
+
+void genFuncCode(int x, tnode*y){
+    return;
+}
+void genMain(tnode *x){
+    return;
+}

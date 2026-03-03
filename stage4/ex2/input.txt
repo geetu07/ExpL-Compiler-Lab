@@ -1,12 +1,17 @@
 begin
     decl
-        int x, *p;
+        int x, *p,y,*q,s;
     enddecl
 
-    x = 5;
-    p = &x;
-    *p = 20;
-
+    x=5;
+    y=10;
+    write(x);
+    write(y);
+    p=&x;
+    q=&y;
+    s=*p;
+    *p=*q;
+    *q=s;
     write(x); 
-    write(*p);
-end;
+    write(y);
+end; 
