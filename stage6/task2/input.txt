@@ -1,0 +1,20 @@
+type
+    point {
+        int x;
+        int y;
+    }
+endtype
+decl
+    point p;
+enddecl
+int main(){
+    decl
+        int result;
+    enddecl
+    begin
+        p = alloc();
+        p.x = 100;
+        write(p.x);
+        free(p);
+    end
+}

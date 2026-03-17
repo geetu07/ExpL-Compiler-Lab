@@ -1,0 +1,31 @@
+type
+    point {
+        int x;
+        int y;
+    }
+endtype
+decl
+    point p;
+    int sum(int a, int b);
+enddecl
+int sum(int a, int b){
+    decl
+        int c;
+    enddecl
+    begin
+        c = a + b;
+        return c;
+    end
+}
+int main(){
+    decl
+        point q;
+        int result;
+    enddecl
+    begin
+        q.x = 5;
+        q.y = 10;
+        result = sum(q.x, q.y);
+        write(result);
+    end
+}
