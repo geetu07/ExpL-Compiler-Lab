@@ -30,7 +30,7 @@ enum nodeTypes {
     NdoWhile,Nrepeat, Ntype, Ndecl, Nstr, NArr, NArrAssign, NArrAccess, NreadArr,
     Nderefer, NaddrTo,NassToDefer, Nmod, Nparam, NFuncDecl, NFuncDef, Nreturn
     ,NlocalDecl,NfuncCall, Nor, Nand, NtypeParam, NUserAssg, NuserDefAcc, NuserDefParam
-    , NuserDefAssg, Nalloc, Nfree
+    , NuserDefAssg, Nalloc, Nfree,Nnull
 };
 
 
@@ -103,11 +103,12 @@ tnode* createLocalDecl(tnode *type, tnode *id);
 tnode* createMain(tnode*l,tnode* body);
 
 
-struct tnode *createMemberAcc(struct tnode *field1Node, struct tnode *field2Node, AccessType accessType);
+struct tnode *createMemberAcc(struct tnode *field1Node, struct tnode *field2Node);
 struct tnode *createMemAssg(struct tnode *fieldAccess, struct tnode *exprNode);
 tnode* createUserType(tnode *id);
 
 tnode *createFree(struct tnode *id);
 tnode *createAlloc(struct tnode *node) ;
+tnode *createNull();
 
 #endif

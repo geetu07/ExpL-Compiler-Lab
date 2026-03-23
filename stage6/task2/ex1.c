@@ -535,7 +535,7 @@ tnode * createFuncDef(tnode *r, tnode* fname, tnode*param, tnode* ldecl, tnode* 
 tnode* createparam(tnode*type, tnode*id,bool c){
 
     tnode *node=createConnect(type,id);
-    if(c && type->nodetype==USER_TYPE){
+    if(c && type->type==USER_TYPE){
     linstall(id->varname,type->type,true, type->typeTableEntry);
     node->nodetype=NuserDefParam;
     }
@@ -607,7 +607,7 @@ tnode* createLocalDecl(tnode *type,tnode *id){
 //user type
 
 
-struct tnode *createMemberAcc(struct tnode *f1, struct tnode *f2, AccessType a){
+struct tnode *createMemberAcc(struct tnode *f1, struct tnode *f2){
     tnode *id;
     TypeTable *utype = NULL;
 
@@ -733,4 +733,16 @@ struct tnode *createAlloc(struct tnode *node) {
     node->nodetype = Nfree;
 
     return node;
+}
+
+tnode *createNull(){
+    tnode *t = malloc(sizeof(tnode));
+    t->left = NULL;
+    t->right = NULL;
+    t->val = 0;
+    t->nodetype = Nnull;
+    t->type = USER_TYPE;
+    t->varname = NULL;
+    t->typeTableEntry = NULL;
+    return t;
 }

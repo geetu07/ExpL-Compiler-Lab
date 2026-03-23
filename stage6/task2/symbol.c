@@ -94,10 +94,10 @@ void addToST(tnode*root){
             else currUserType=NULL;
                 break;}
         case Nvar:{
-            int y;
-            if(curr==USER_TYPE)
-                y=currUserType->size;
-            else y=1;
+            int y=1;
+            // if(curr==USER_TYPE)
+            //     y=currUserType->size;
+            // else y=1;
             Gsymbol *x=Install(root->varname,curr,y,false,currUserType,-1);
             root->Gentry=x;
             root->type = root->Gentry->type;
@@ -170,10 +170,12 @@ void addParams(struct Gsymbol *x, tnode*paramlist){
     else if(paramlist->nodetype==Nparam){
         tnode* t=paramlist->left;
         tnode*pa=paramlist->right;
-        addParam(x, pa->varname,t->type,t->typeTableEntry);
+        int type = t->typeTableEntry ? USER_TYPE : t->type;
+        addParam(x, pa->varname,type,t->typeTableEntry);
     }
     else if(paramlist->nodetype==NtypeParam){
-        addParam(x,paramlist->right->varname, paramlist->left->type,paramlist->left->typeTableEntry);
+        int type = paramlist->left->typeTableEntry ? USER_TYPE : paramlist->left->type;
+        addParam(x,paramlist->right->varname,type,paramlist->left->typeTableEntry);
     }
 }
 
@@ -228,7 +230,7 @@ bool checkParams(tnode *x, Param **param){
     if(x->nodetype== Nconnect){
         return checkParams(x->left,param) && checkParams(x->right,param);
     }
-    if(x->nodetype==Nparam || x->nodetype==NtypeParam){
+    if(x->nodetype==Nparam || x->nodetype==NtypeParam || x->nodetype == NuserDefParam){
         if(!*param){
             printf("Func arg mismatch no mpre params\n");
             exit(1);
@@ -370,6 +372,17 @@ void popLocal(tnode*x){
     }
 }
 
+FieldList *mergerField(FieldList *f1,  FieldList *f2){
+    if(!f1 && !f2)return NULL;
+    if(!f1)return f2;
+    if(!f2)return f1;
+    FieldList *f=f1;
+    while(f->next)
+        f=f->next;
+    f->next=f2;
+    return f1;
+}
+
 ////TYPE TABLE//////
 
 TypeTable *tthead=NULL;
@@ -408,16 +421,6 @@ FieldList *createTypeFieldE(char *name, TypeTable *t){
     return f;
 }
 
-FieldList *mergerField(FieldList *f1,  FieldList *f2){
-    if(!f1 && !f2)return NULL;
-    if(!f1)return f2;
-    if(!f2)return f1;
-    FieldList *f=f1;
-    while(f->next)
-        f=f->next;
-    f->next=f2;
-    return f1;
-}
 
 TypeTable *createNewType(char *name){
     TypeTable *x=typeLookup(name);

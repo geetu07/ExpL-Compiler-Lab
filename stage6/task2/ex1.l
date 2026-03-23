@@ -25,6 +25,8 @@
 ";"	{return SEMICOLON;}
 "&"	{return AMP;}
 
+"null"    { return NULLk; }
+
 "alloc"         { return ALLOC; }
 "free"          { return FREE; }
 

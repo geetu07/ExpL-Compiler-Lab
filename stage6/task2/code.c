@@ -285,6 +285,11 @@ int generateCode(tnode* root){
         case NUserAssg:{
             generateUserAssign(root);
             return -1;}
+        case Nnull:{
+            int r = getFreeRegister();
+            fprintf(target, "MOV R%d, 0\n", r);
+            return r;
+        }
         default: return -1;
     }
 }
@@ -700,9 +705,14 @@ void findUserTypeFieldAddr(int *fieldAddrReg, struct tnode *node, struct TypeTab
                 *fieldAddrReg = getFreeRegister();
                 if (localEntry) {
                     int binding = localEntry->binding;
+                    *fieldAddrReg = getFreeRegister();
                     fprintf(target, "MOV R%d, BP\n", *fieldAddrReg);
-                    fprintf(target, "ADD R%d, %d\n", *fieldAddrReg, binding+1);
-                    fprintf(target, "MOV R%d, [R%d]\n", *fieldAddrReg, *fieldAddrReg); 
+                    if(binding < 0){
+                        fprintf(target, "SUB R%d, %d\n", *fieldAddrReg, -binding);
+                    } else {
+                        fprintf(target, "ADD R%d, %d\n", *fieldAddrReg, binding + 1);
+                    }
+                    fprintf(target, "MOV R%d, [R%d]\n", *fieldAddrReg, *fieldAddrReg);
                 } else if (globalEntry) {
                     int binding = globalEntry->binding;
                     fprintf(target, "MOV R%d, %d\n", *fieldAddrReg, binding);

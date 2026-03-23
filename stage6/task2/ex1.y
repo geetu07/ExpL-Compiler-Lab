@@ -19,7 +19,7 @@
 	
 }
 %type <node> expr program stmtlist stmt InputStmt OutputStmt AsgStmt IfStmt WhileStmt doWhileStmt RepeatStmt Type
-%token PLUS MINUS MUL DIV READ WRITE ASSIGN SEMICOLON GT GE LE LT EQ NE INTT STRINGT COMM AMP MOD ALLOC FREE
+%token PLUS MINUS MUL DIV READ WRITE ASSIGN SEMICOLON GT GE LE LT EQ NE INTT STRINGT COMM AMP MOD ALLOC FREE NULLk
 %token ENDK BEGINK IFK THENK ELSEK ENDIFK WHILEK DOK ENDWHILEK RETURN_K LBRACE RBRACE
 %token BREAKK CONTINUEK REPEATK UNTILK DECL ENDDECL OR AND MAINK
 %token TYPE_start TYPE_end DOT ARROW 
@@ -191,9 +191,8 @@ AsgStmt:ID ASSIGN expr SEMICOLON {$$=createAssign($1,$3);}
 		| memberAccess ASSIGN expr SEMICOLON 	{$$=createMemAssg($1,$3);}
 	;
 
-memberAccess: memberAccess DOT ID	{$$= createMemberAcc($1,$3,ACCDOT);}
-			|ID DOT ID	{$$= createMemberAcc($1,$3,ACCDOT);}
-			| ID ARROW ID	{$$= createMemberAcc($1,$3,ACCARR);}
+memberAccess: memberAccess DOT ID	{$$= createMemberAcc($1,$3);}
+			|ID DOT ID	{$$= createMemberAcc($1,$3);}
 			;
 
 IfStmt: IFK '(' boolexpr ')' THENK stmtlist ELSEK stmtlist ENDIFK	{$$=createIfElseNode($3, $6, $8);}
@@ -217,6 +216,7 @@ expr : expr PLUS expr		{$$ = makeOperatorNode('+',$1,$3);}
 	 | NUM			{$$ = $1;}
 	 | ID 			{$$=createVariableUsageNode($1->varname);}
 	 |STRING_LITERAL	{$$=$1;}
+	 | NULLk    { $$ = createNull(); }
 	 | ID '['expr ']'	{$$=createArrayAccess($1,$3);}
 	 | ID '['expr ']' '[' expr ']'	{$$=createArrayAccess($1,createConnect($3,$6));}
 	 | MUL ID	{$$=createDerefer($2);}

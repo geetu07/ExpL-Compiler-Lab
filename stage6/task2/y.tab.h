@@ -75,34 +75,35 @@ extern int yydebug;
     MOD = 276,                     /* MOD  */
     ALLOC = 277,                   /* ALLOC  */
     FREE = 278,                    /* FREE  */
-    ENDK = 279,                    /* ENDK  */
-    BEGINK = 280,                  /* BEGINK  */
-    IFK = 281,                     /* IFK  */
-    THENK = 282,                   /* THENK  */
-    ELSEK = 283,                   /* ELSEK  */
-    ENDIFK = 284,                  /* ENDIFK  */
-    WHILEK = 285,                  /* WHILEK  */
-    DOK = 286,                     /* DOK  */
-    ENDWHILEK = 287,               /* ENDWHILEK  */
-    RETURN_K = 288,                /* RETURN_K  */
-    LBRACE = 289,                  /* LBRACE  */
-    RBRACE = 290,                  /* RBRACE  */
-    BREAKK = 291,                  /* BREAKK  */
-    CONTINUEK = 292,               /* CONTINUEK  */
-    REPEATK = 293,                 /* REPEATK  */
-    UNTILK = 294,                  /* UNTILK  */
-    DECL = 295,                    /* DECL  */
-    ENDDECL = 296,                 /* ENDDECL  */
-    OR = 297,                      /* OR  */
-    AND = 298,                     /* AND  */
-    MAINK = 299,                   /* MAINK  */
-    TYPE_start = 300,              /* TYPE_start  */
-    TYPE_end = 301,                /* TYPE_end  */
-    DOT = 302,                     /* DOT  */
-    ARROW = 303,                   /* ARROW  */
-    ID = 304,                      /* ID  */
-    NUM = 305,                     /* NUM  */
-    STRING_LITERAL = 306           /* STRING_LITERAL  */
+    NULLk = 279,                   /* NULLk  */
+    ENDK = 280,                    /* ENDK  */
+    BEGINK = 281,                  /* BEGINK  */
+    IFK = 282,                     /* IFK  */
+    THENK = 283,                   /* THENK  */
+    ELSEK = 284,                   /* ELSEK  */
+    ENDIFK = 285,                  /* ENDIFK  */
+    WHILEK = 286,                  /* WHILEK  */
+    DOK = 287,                     /* DOK  */
+    ENDWHILEK = 288,               /* ENDWHILEK  */
+    RETURN_K = 289,                /* RETURN_K  */
+    LBRACE = 290,                  /* LBRACE  */
+    RBRACE = 291,                  /* RBRACE  */
+    BREAKK = 292,                  /* BREAKK  */
+    CONTINUEK = 293,               /* CONTINUEK  */
+    REPEATK = 294,                 /* REPEATK  */
+    UNTILK = 295,                  /* UNTILK  */
+    DECL = 296,                    /* DECL  */
+    ENDDECL = 297,                 /* ENDDECL  */
+    OR = 298,                      /* OR  */
+    AND = 299,                     /* AND  */
+    MAINK = 300,                   /* MAINK  */
+    TYPE_start = 301,              /* TYPE_start  */
+    TYPE_end = 302,                /* TYPE_end  */
+    DOT = 303,                     /* DOT  */
+    ARROW = 304,                   /* ARROW  */
+    ID = 305,                      /* ID  */
+    NUM = 306,                     /* NUM  */
+    STRING_LITERAL = 307           /* STRING_LITERAL  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -132,34 +133,35 @@ extern int yydebug;
 #define MOD 276
 #define ALLOC 277
 #define FREE 278
-#define ENDK 279
-#define BEGINK 280
-#define IFK 281
-#define THENK 282
-#define ELSEK 283
-#define ENDIFK 284
-#define WHILEK 285
-#define DOK 286
-#define ENDWHILEK 287
-#define RETURN_K 288
-#define LBRACE 289
-#define RBRACE 290
-#define BREAKK 291
-#define CONTINUEK 292
-#define REPEATK 293
-#define UNTILK 294
-#define DECL 295
-#define ENDDECL 296
-#define OR 297
-#define AND 298
-#define MAINK 299
-#define TYPE_start 300
-#define TYPE_end 301
-#define DOT 302
-#define ARROW 303
-#define ID 304
-#define NUM 305
-#define STRING_LITERAL 306
+#define NULLk 279
+#define ENDK 280
+#define BEGINK 281
+#define IFK 282
+#define THENK 283
+#define ELSEK 284
+#define ENDIFK 285
+#define WHILEK 286
+#define DOK 287
+#define ENDWHILEK 288
+#define RETURN_K 289
+#define LBRACE 290
+#define RBRACE 291
+#define BREAKK 292
+#define CONTINUEK 293
+#define REPEATK 294
+#define UNTILK 295
+#define DECL 296
+#define ENDDECL 297
+#define OR 298
+#define AND 299
+#define MAINK 300
+#define TYPE_start 301
+#define TYPE_end 302
+#define DOT 303
+#define ARROW 304
+#define ID 305
+#define NUM 306
+#define STRING_LITERAL 307
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -171,7 +173,7 @@ union YYSTYPE
 	FieldList *field;
 	
 
-#line 175 "y.tab.h"
+#line 177 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
