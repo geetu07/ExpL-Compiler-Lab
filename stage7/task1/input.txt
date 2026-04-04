@@ -1,0 +1,55 @@
+class
+  Rectangle {
+    decl
+      int width;
+      int height;
+      int setDims(int w, int h);
+      int area();
+      int isSquare();
+    enddecl
+    int setDims(int w, int h){
+      decl
+      enddecl
+      begin
+        self.width = w;
+        self.height = h;
+        return 1;
+      end
+    }
+    int area(){
+      decl
+      enddecl
+      begin
+        return self.width * self.height;
+      end
+    }
+    int isSquare(){
+      decl
+      enddecl
+      begin
+        if(self.width == self.height) then
+          return 1;
+        else
+          return 0;
+        endif
+      end
+    }
+  }
+endclass
+decl
+  Rectangle r;
+  int result;
+enddecl
+int main(){
+  decl
+  enddecl
+  begin
+    r = new(Rectangle);
+    r.setDims(5, 5);
+    result = r.area();
+    write(result);
+    result = r.isSquare();
+    write(result);
+    delete(r);
+  end
+}

@@ -1,0 +1,132 @@
+class
+  Stack {
+    decl
+      int top;
+      int s0;
+      int s1;
+      int s2;
+      int s3;
+      int init();
+      int push(int val);
+      int pop();
+      int getTop();
+    enddecl
+    int init(){
+      decl
+      enddecl
+      begin
+        self.top = 0;
+        return 1;
+      end
+    }
+    int push(int val){
+      decl
+      enddecl
+      begin
+        if(self.top == 0) then
+          self.s0 = val;
+        else
+          if(self.top == 1) then
+            self.s1 = val;
+          else
+            if(self.top == 2) then
+              self.s2 = val;
+            else
+              self.s3 = val;
+            endif
+          endif
+        endif
+        self.top = self.top + 1;
+        return 1;
+      end
+    }
+    int pop(){
+      decl
+        int val;
+      enddecl
+      begin
+        self.top = self.top - 1;
+        if(self.top == 0) then
+          val = self.s0;
+        else
+          if(self.top == 1) then
+            val = self.s1;
+          else
+            if(self.top == 2) then
+              val = self.s2;
+            else
+              val = self.s3;
+            endif
+          endif
+        endif
+        return val;
+      end
+    }
+    int getTop(){
+      decl
+      enddecl
+      begin
+        return self.top;
+      end
+    }
+  }
+endclass
+
+decl
+  Stack st;
+  int result;
+  int fillStack(int a, int b, int c);
+  int sumTwo(int x, int y);
+enddecl
+
+int sumTwo(int x, int y){
+  decl
+  enddecl
+  begin
+    return x + y;
+  end
+}
+
+int fillStack(int a, int b, int c){
+  decl
+  enddecl
+  begin
+    st.push(a);
+    st.push(b);
+    st.push(c);
+    return 1;
+  end
+}
+
+int main(){
+  decl
+    int x;
+    int y;
+    int z;
+  enddecl
+  begin
+    st = new(Stack);
+    st.init();
+
+    fillStack(10, 20, 30);
+
+    result = st.getTop();
+    write(result);
+
+    x = st.pop();
+    y = st.pop();
+    z = st.pop();
+
+    write(x);
+    write(y);
+    write(z);
+
+    result = sumTwo(x, y);
+    write(result);
+
+    result = st.getTop();
+    write(result);
+
+    delete(st);
+  end
+}
